@@ -1,0 +1,87 @@
+//khai bαo thu vi?n
+#include<p18f4520.h>
+#include<stdio.h>
+#include<delays.h>
+//c?u hμnh
+#pragma config OSC=HS
+#pragma config WDT=OFF
+#pragma config MCLRE=ON
+#pragma config PBADEN=OFF
+
+#define PB1 TRISBbits.RB0
+#define PB2 TRISBbits.RB2
+#define LED5 PORTBbits.RB7
+//khai bαo tκn CTCPVN
+void ngat_uu_tien_cao(void);
+void ngat_uu_tien_thap(void);
+//Πi?m d?t CTCPVN cσ m?c uu tiκn cao UTC, vector 0008H
+	#pragma code uu_tien_cao=0x08
+void ngat_cao(void)
+{
+	ngat_uu_tien_cao();
+}
+#pragma code
+#pragma interrupt ngat_uu_tien_cao
+void ngat_uu_tien_cao(void)
+{
+	INTCONbits.INT0F =0;
+	LED5=1;
+}
+//Πi?m d?t CTCPVN cσ m?c uu tiκn th?p (UTT), vector 0018H
+#pragma code uu_tien_thap = 0x18
+void ngat_thap(void)
+{
+	ngat_uu_tien_thap();
+}
+#pragma code
+#pragma interrupt ngat_uu_tien_thap
+void ngat_uu_tien_thap(void)
+{
+	INTCON3bits.INT2F = 0;
+	LED5=0;
+}
+void main(void)
+{
+	ADCON1 = 0x0F;
+	TRISB = 0b00000101;
+	
+	RCONbits.IPEN=1;
+	INTCONbits.GIE =1;
+	INTCONbits.PEIE =1;
+	
+	INTCONbits.INT0IE =1;
+	INTCONbits.INT0IF =0;
+	INTCON2bits.INTEDG0 =0;
+	
+	INTCON3bits.INT2IE =1;
+	INTCON3bits.INT2IF =0;
+	INTCON3bits.INT2IP =0;
+	INTCON2bits.INTEDG2 =0;
+	
+	while(1)
+	{
+		PORTBbits.RB3 =1;
+		PORTBbits.RB4 =0;
+		PORTBbits.RB5 =0;
+		PORTBbits.RB6 =0;
+		Delay10KTCYx(100);
+		
+		PORTBbits.RB3 =0;
+		PORTBbits.RB4 =1;
+		PORTBbits.RB5 =0;
+		PORTBbits.RB6 =0;
+		Delay10KTCYx(100);
+		
+		PORTBbits.RB3 =0;
+		PORTBbits.RB4 =0;
+		PORTBbits.RB5 =1;
+		PORTBbits.RB6 =0;
+		Delay10KTCYx(100);
+		
+		PORTBbits.RB3 =0;
+		PORTBbits.RB4 =0;
+		PORTBbits.RB5 =0;
+		PORTBbits.RB6 =1;
+		Delay10KTCYx(100);
+	}
+}
